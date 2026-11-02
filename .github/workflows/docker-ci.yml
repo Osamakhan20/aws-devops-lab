@@ -1,0 +1,35 @@
+
+name: Docker CI
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Build Docker image
+        run: docker build -t aws-devops-web:ci ./process-lab
+
+      - name: Start container
+        run: docker run -d --name ci-web -p 127.0.0.1:8080:80 aws-devops-web:ci
+
+      - name: Test website
+        run: |
+          for i in {1..10}; do
+            if curl --fail --silent http://127.0.0.1:8080/ | grep -q "My First DevOps Server"; then
+              echo "Website test passed!"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs ci-web
+          exit 1
