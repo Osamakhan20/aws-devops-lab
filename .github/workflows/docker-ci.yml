@@ -94,7 +94,7 @@ jobs:
               ("docker pull " + $image),
               "docker rm -f devops-web || true",
               ("docker run -d --name devops-web --restart unless-stopped -p 80:80 " + $image),
-              "curl --fail --silent --show-error --retry 10 --retry-all-errors --retry-delay 2 http://127.0.0.1/ | grep -F \"My First DevOps Server\""
+              if curl --fail --silent http://127.0.0.1:8080/ | grep -Fq "devops-health-check"; then
             ]
           }')
 
