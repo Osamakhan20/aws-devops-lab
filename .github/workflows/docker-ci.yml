@@ -88,15 +88,17 @@ jobs:
           set -euo pipefail
           : "${INSTANCE_ID:?Missing EC2_INSTANCE_ID variable}"
 
-          COMMANDS=$(jq -n --arg image "$IMAGE" '{
-            commands: [
-              "set -eu",
-              ("docker pull " + $image),
-              "docker rm -f devops-web || true",
-              ("docker run -d --name devops-web --restart unless-stopped -p 80:80 " + $image),
-              if curl --fail --silent http://127.0.0.1:8080/ | grep -Fq "devops-health-check"; then
-            ]
-          }')
+         
+    COMMANDS=$(jq -n --arg image "$IMAGE" '{
+      commands: [
+        "set -eu",
+       ("docker pull " + $image),
+      "docker rm -f devops-web || true",
+       ("docker run -d --name devops-web --restart unless-stopped -p 80:80 " + $image),
+       "curl -fsS http://127.0.0.1/ | grep -Fq devops-health-check"
+      ]
+        }')
+
 
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
